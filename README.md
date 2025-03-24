@@ -5,9 +5,7 @@ This project provides an Ansible playbook that automates the process of deployin
 - Checks if Docker, Git, and Docker Compose are installed.
 - Clones the weather app repository from GitHub.
 - Builds Docker images from the cloned repository.
-- Logs into Docker Hub.
-- Pushes the Docker images to Docker Hub.
-- Pulls the Docker images and starts the services using Docker Compose.
+- starts the services using Docker Compose.
 
 ## Prerequisites
 
