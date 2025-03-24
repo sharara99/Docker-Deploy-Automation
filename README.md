@@ -1,11 +1,13 @@
 # Simple Docker Deployment for Weather App
 ![Automated Photo](Animation.gif)
+
+
 This project provides an Ansible playbook that automates the process of deploying a weather application using Docker and Docker Compose. The playbook performs the following tasks:
 
 - Checks if Docker, Git, and Docker Compose are installed.
 - Clones the weather app repository from GitHub.
 - Builds Docker images from the cloned repository.
-- starts the services using Docker Compose.
+- Starts the services using Docker Compose.
 
 ## Prerequisites
 
