@@ -1,0 +1,66 @@
+---
+- name: Simple Docker Deployment for Weather App
+  hosts: serverA
+  become: true
+
+  vars_files:
+    - vars.yml
+
+  vars:
+    ansible_user: "ansible"
+
+  tasks:
+    - name: Check if Docker is installed
+      command: docker --version
+      register: docker_installed
+      ignore_errors: true
+
+    - name: Fail if Docker is not installed
+      fail:
+        msg: "Docker is not installed!"
+      when: docker_installed.failed
+
+    - name: Check if Git is installed
+      command: git --version
+      register: git_installed
+      ignore_errors: true
+
+    - name: Fail if Git is not installed
+      fail:
+        msg: "Git is not installed!"
+      when: git_installed.failed
+
+    - name: Check if Docker Compose is installed
+      command: docker compose version
+      register: docker_compose_installed
+      ignore_errors: true
+
+    - name: Fail if Docker Compose is not installed
+      fail:
+        msg: "Docker Compose is not installed!"
+      when: docker_compose_installed.failed
+
+    - name: Clone the Git repository
+      git:
+        repo: "{{ git_repo_url }}"
+        dest: "{{ playbook_dir }}/theweatherapp"
+
+    - name: Build the Docker images
+      command: docker compose build
+      args:
+        chdir: "{{ playbook_dir }}/theweatherapp"
+
+    - name: Login to Docker Hub using Token
+      command: echo "{{ dockerhub_token }}" | docker login -u "{{ dockerhub_username }}" --password-stdin
+      no_log: true
+
+    # - name: Push Docker images to Docker Hub
+    #   docker_compose:
+    #     project_src: "{{ playbook_dir }}/theweatherapp"
+    #     pull: yes
+    #     push: yes
+
+    - name: Start the services using Docker Compose
+      command: docker compose up -d
+      args:
+        chdir: "{{ playbook_dir }}/theweatherapp"

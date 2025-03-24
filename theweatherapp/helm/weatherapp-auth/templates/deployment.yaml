@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "weatherapp-auth.fullname" . }}
+  labels:
+    {{- include "weatherapp-auth.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "weatherapp-auth.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "weatherapp-auth.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "weatherapp-auth.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: afakharany/weatherapp-auth:{{ .Chart.AppVersion }}
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: {{ .Values.service.port }}
+        env:
+          - name: DB_HOST
+            value: weatherapp-auth-mysql
+          - name: DB_USER
+            value: {{ .Values.mysql.auth.username }}
+          - name: DB_PASSWORD
+            value: {{ .Values.mysql.auth.password }}
+          - name: DB_NAME
+            value: {{ .Values.mysql.auth.database }}
+          - name: DB_PORT
+            value: "3306"
+          - name: SECRET_KEY
+            value: {{ .Values.secretKey }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
